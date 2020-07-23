@@ -1,0 +1,15 @@
+# system files and the such
+__pycache__/
+.ipynb_checkpoints/
+venv/
+data/.ipynb_checkpoints/
+data/lyrics/.DS_Store
+data/data collection/__pycache__/
+data/data collection/.DS_Store
+.DS_Store
+
+# files to ignore
+data/data collection/lyrics csv clean.ipynb
+
+# dir to ignore
+data/lyrics/
