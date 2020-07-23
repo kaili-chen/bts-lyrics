@@ -10,7 +10,7 @@ Functions:
     count_adlibs(string) --> dictionary object
 
 
-Last updated 23 July 2020, 6:36 PM
+Last updated 23 July 2020, 9:43 PM
 '''
 
 # variables
@@ -122,7 +122,15 @@ ADLIBS = ADLIB_PATTERNS.values()
 
 # methods
 def count_adlibs(lyrics):
-    '''function to return adlibs and their counts in the input lyrics'''
+    '''
+    Returns a dictionary of the counts of each adlib in the lyrics.
+
+    Parameters:
+        lyrics (string) : lyrics to extract adlib counts from
+
+    Returns:
+        counts (dictionary) : contains each adlib and their counts in the lyrics
+    '''
     lyrics = lyrics.lower().strip()
     lyrics = lyrics.split()
     counts = {}
