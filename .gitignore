@@ -10,6 +10,7 @@ data/data collection/.DS_Store
 
 # files to ignore
 data/data collection/lyrics csv clean.ipynb
+eda.ipynb
 
 # dir to ignore
 data/lyrics/
