@@ -1,17 +1,8 @@
 '''
 Contains attributes and methods to assist in processing lyrics.
-
-Variables:
-    CONTRACTIONS
-    ADLIB_PATTERNS
-    ADLIBS
-
-Functions:
-    count_adlibs(string) --> dictionary object
-
-
-Last updated 23 July 2020, 9:43 PM
 '''
+
+import re
 
 # variables
 CONTRACTIONS = {
@@ -34,6 +25,7 @@ CONTRACTIONS = {
     "lovin": "love",
     "makin": "make",
     "dreamin": "dream",
+    "gal": "girl",
     "goin": "going",
     "vibin": "vibing",
     "jigglin": "jiggling",
@@ -82,7 +74,7 @@ CONTRACTIONS = {
     "tippin": "tipping",
     "lyin": "lying",
     "walkin": "walking",
-    "rollin": "rollin",
+    "rollin": "rolling",
     "trippin": "tripping",
     "runnin": "running",
     "kissin": "kissing",
@@ -92,17 +84,33 @@ CONTRACTIONS = {
     "y all": "you all",
     "luv": "love",
     "wassup": "what is up",
+    "wussup": "what is up",
+    "whatchu": "what you",
     "em": "them",
     "\'em'": "them",
     "ya": "you",
     "leggo": "lets go",
     "gurl": "girl",
     "errday": "everyday",
-    "err day": "everyday"
+    "err day": "everyday",
+    "lemme": "let me",
+    "hol": "hold",
+    "thang": "thing",
+    "killin": "killing",
+    "dunno": "don know",
+    "dis": "this",
+    "becuz": 'because',
+    "cuz": "because",
+    "dat": "that",
+    "errbody": "everybody",
+    "errthing": "everything",
+    "pourin": "pouring"
 }
 
-ADLIB_PATTERNS = {
+# non-lexical vocables
+NON_LEX_VOCABLES_PATTERNS = {
     "^(aa*hh*)$": "ah",
+    "ahem": "ahem",
     "^(aa*yy*)$": "ay",
     "^(ll*aa*)$": "la",
     "^(heyy*)$": "hey",
@@ -112,16 +120,77 @@ ADLIB_PATTERNS = {
     "^(yy*aa*)$": "ya",
     "yeah": "yeah",
     "^(yoo*)$": "yo",
+    "^(hh*aa*)$": "ha",
+    "haha": "ha",
     "heh": "heh",
     "^(ee*hh*)$": "eh",
     "wow": "wow",
-    "^(hh*oo*)$": "ho"
+    "^(w+o+)$": "wo",
+    "^(hh*oo*)$": "ho",
+    "^(whoo*)$": "wo",
+    "owoah": "woah",
+    "woah": "woah",
+    "ayo": "ayo"    
 }
 
-ADLIBS = ADLIB_PATTERNS.values()
+NON_LEX_VOCABLES = list(NON_LEX_VOCABLES_PATTERNS.values())
 
 # methods
-def count_adlibs(lyrics):
+def expand_contractions(lyrics):
+    '''
+    Returns a list of the given lyrics (string) with adlib reduced to plain form.
+
+    Parameters:
+        lyrics (string) : lyrics to reduce contractions from
+
+    Returns:
+        clean (string) : string with contractions expanded
+    '''
+    lyrics = lyrics.lower().strip()
+    lyrics = lyrics.split()
+    clean = []
+
+    for word in lyrics:
+        match = False
+        for pattern, value in CONTRACTIONS.items():
+            if re.match(pattern, word):
+                match = True
+                clean.append(value)
+
+        if not match:
+            clean.append(word)
+
+    return " ".join(clean)
+
+
+def reduce_non_lex_vocables(lyrics):
+    '''
+    Returns a list of the given lyrics (string) with adlib reduced to plain form.
+
+    Parameters:
+        lyrics (string) : lyrics to reduce adlibs from
+
+    Returns:
+        clean (string) : string with adlibs reduced
+    '''
+    lyrics = lyrics.lower().strip()
+    lyrics = lyrics.split()
+    clean = []
+
+    for word in lyrics:
+        match = False
+        for pattern, value in NON_LEX_VOCABLES_PATTERNS.items():
+            if re.match(pattern, word):
+                match = True
+                clean.append(value)
+
+        if not match:
+            clean.append(word)
+
+    return " ".join(clean)
+
+
+def count_non_lex_vocables(lyrics):
     '''
     Returns a dictionary of the counts of each adlib in the lyrics.
 
@@ -136,7 +205,7 @@ def count_adlibs(lyrics):
     counts = {}
 
     for word in lyrics:
-        for pattern, value in ADLIB_PATTERNS.items():
+        for pattern, value in NON_LEX_VOCABLES_PATTERNS.items():
             found = re.findall(pattern, word)
             if len(found) > 0:
                 if value in counts:
@@ -145,6 +214,31 @@ def count_adlibs(lyrics):
                     counts[value] = len(found)
 
     return counts
+
+def remove_non_lex_vocables(lyrics):
+    '''
+    Returns a list of the given lyrics (string) with adlibs removed.
+
+    Parameters:
+        lyrics (string) : lyrics to remove adlib from
+
+    Returns:
+        lyrics_no_ab (string) : string with adlibs removed
+    '''
+    lyrics = lyrics.lower().strip()
+    lyrics = lyrics.split()
+    clean = []
+
+    for word in lyrics:
+        match = False
+        for pattern, value in NON_LEX_VOCABLES_PATTERNS.items():
+            if re.match(pattern, word):
+                match = True
+
+        if not match:
+            clean.append(word)
+
+    return " ".join(clean)
 
 if __name__ == '__main__':
     pass

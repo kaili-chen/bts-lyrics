@@ -44,10 +44,10 @@ CONTRACTIONS = {
     "he'd":	    "he had",
     "he'll":	"he will",
     "he's":	    "he is",
-    "I'd":      "I had",
-    "I'll":     "I will",
-    "I'm":      "I am",
-    "I've":	    "I have",
+    "i'd":      "i had",
+    "i'll":     "i will",
+    "i'm":      "i am",
+    "i've":	    "i have",
     "isn't":    "is not",
     "it's":	    "it is",
     "let's":	"let us",
@@ -87,16 +87,31 @@ CONTRACTIONS = {
 
 STOPWORDS = nltk.corpus.stopwords.words('english')
 
+# sometimes, lemma needs help (e.g.  lemmatizes 'us' to 'u')
+LEMMA_EXCEPTIONS = ["us"]
+
 # FUNCTIONS
-def normalise(text, remove_punc=True, stopwords=STOPWORDS, expand_contractions=False):
+lemmatizer = nltk.stem.WordNetLemmatizer()
+stemmer = nltk.stem.PorterStemmer()
+
+def lemmatize_word(word):
+    if word not in LEMMA_EXCEPTIONS:
+        return lemmatizer.lemmatize(word)
+    else:
+        return word 
+
+def normalise(text, remove_punc=True, stopwords=STOPWORDS, extra_stopwords=None, lemmatize=True, expand_contractions=False, replacements=None):
     '''
     Returns normalised text according to given parameters and flags.
 
     Parameters:
         text (string) : string to be normalised
-        remove_punc (boolean) [default=True] : to indicate whether to remove puncutation
-        stopwords (list) [default=nltk.corpus.stopwords.words('english')] : 'None' to not remove stopwords or provide another list of stopwords to remove
-        expand_contractions (boolean) [default=False] : to indicate whether to expand contractions (can be viewed in variable CONTRACTIONS)
+        remove_punc (boolean) [default = True] : to indicate whether to remove puncutation
+        stopwords (list) [default = nltk.corpus.stopwords.words('english')] : 'None' to not remove stopwords or provide another list of stopwords to remove
+        extra_stopwords (list) [default = None] : additional stopwords to be added to the nltk stopwords, if any
+        lemmatize (boolean) [default = True]: whether to lemmatize each word, uses nltk wordnet lemmatizer
+        expand_contractions (boolean) [default = False] : to indicate whether to expand contractions (can be viewed in variable CONTRACTIONS)
+        replacements (dict) [default = None] : key (word), value (word's replacement), runs after contractions expanded if indicated
 
     Returns:
         text (string) : given text normalised according to given flags.
@@ -112,20 +127,35 @@ def normalise(text, remove_punc=True, stopwords=STOPWORDS, expand_contractions=F
         # remove double spacing sometimes caused by removal of punctuation
         text = re.sub(r'\s+', ' ', text)
 
+        # expand contractions
         if expand_contractions:
             for k, v in CONTRACTIONS.items():
+                # uses a spaced version of contraction (e.g. 'don t' instead of 'don't) as punctuation removed
                 contraction = k.replace("\'", " ")
-                text = text.replace(contraction, v)
+                text = re.sub('\s'+contraction+'\s', ' '+v+' ', text)
     else:
-        # expand contractions
+        # expand contractions; might cause issues if the ' is not a stright one (aka smart quotes)
         if expand_contractions:
             expanded = [CONTRACTIONS[word] for word in txt.split() if word in CONTRACTIONS.keys()]
 
+    # deal with replacements
+    if replacements:
+        replaced = [replacements[word] if word in replacements.keys() else word for word in text.split()]
+        text = ' '.join(replaced)         
+
     # remove STOPWORDS
     if stopwords:
-        no_stops = [word for word in text.split() if word not in stopwords]
+        # add additional stop words if any
+        if extra_stopwords:
+            stopwords.extend(extra_stopwords)
 
+        no_stops = [word for word in text.split() if word not in stopwords]
         text = ' '.join(no_stops)
+    
+    # lemmatize
+    if lemmatize:
+        lemmatized = [lemmatize_word(word) for word in text.split()]
+        text = ' '.join(lemmatized)
 
     return text
 
